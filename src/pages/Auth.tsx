@@ -22,7 +22,7 @@ import {
   Building,
   Bike,
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -31,6 +31,7 @@ const Auth = () => {
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
+  const navigate = useNavigate();
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -53,6 +54,10 @@ const Auth = () => {
           ? "You're now signed in."
           : "Please check your email to verify your account.",
     });
+    // Navigate to home after sign in, or to auth after sign up
+    if (mode === "signin") {
+      navigate("/");
+    }
   };
 
   const roleIcons = {
