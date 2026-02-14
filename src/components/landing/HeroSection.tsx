@@ -18,13 +18,38 @@ const HeroSection = () => {
       </div>
 
       <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
+        <div className="flex items-center justify-between">
+          {/* Left Floating Cards */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
+            className="hidden xl:flex flex-col gap-4 w-64"
+          >
+            <FloatingCard
+              title="Food Rescued"
+              subtitle="120 kg saved today"
+              location="Bangalore, India"
+              time="Updated just now"
+              delay={0.5}
+              variant="success"
+            />
+            <FloatingCard
+              title="NGO Matched"
+              subtitle="Hope Foundation accepted"
+              location="JP Nagar, Bangalore"
+              time="5 mins ago"
+              delay={0.7}
+              variant="warm"
+            />
+          </motion.div>
+
+          {/* Center Content */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
-            className="max-w-xl"
+            className="max-w-xl mx-auto text-center"
           >
             {/* Badge */}
             <motion.div
@@ -51,7 +76,7 @@ const HeroSection = () => {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-12">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button variant="hero" size="xl" asChild>
                 <Link to="/donate" className="gap-2">
                   Donate Food <ArrowRight className="w-5 h-5" />
@@ -63,7 +88,7 @@ const HeroSection = () => {
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap gap-8">
+            <div className="flex flex-wrap justify-center gap-8">
               <StatItem icon={Heart} value="50,000+" label="Meals Served" />
               <StatItem icon={Users} value="2,500+" label="Volunteers" />
               <StatItem icon={MapPin} value="100+" label="Cities" />
@@ -75,14 +100,13 @@ const HeroSection = () => {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.3 }}
-            className="hidden lg:block relative"
+            className="hidden xl:flex flex-col gap-4 w-64"
           >
             <FloatingCard
               title="New Donation"
               subtitle="50 meals available"
               location="Koramangala, Bangalore"
               time="Expires in 2 hours"
-              className="absolute top-20 right-10"
               delay={0.5}
             />
             <FloatingCard
@@ -90,7 +114,6 @@ const HeroSection = () => {
               subtitle="Volunteer on the way"
               location="Indiranagar, Bangalore"
               time="ETA: 15 mins"
-              className="absolute top-52 right-32"
               delay={0.7}
               variant="warm"
             />
@@ -99,7 +122,6 @@ const HeroSection = () => {
               subtitle="30 meals to Hope NGO"
               location="JP Nagar, Bangalore"
               time="Just now"
-              className="absolute top-80 right-0"
               delay={0.9}
               variant="success"
             />
@@ -123,7 +145,7 @@ const StatItem = ({
     <div className="w-10 h-10 rounded-lg bg-accent flex items-center justify-center">
       <Icon className="w-5 h-5 text-primary" />
     </div>
-    <div>
+    <div className="text-left">
       <div className="text-xl font-bold text-foreground">{value}</div>
       <div className="text-sm text-muted-foreground">{label}</div>
     </div>
@@ -158,7 +180,7 @@ const FloatingCard = ({
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ delay, duration: 0.5 }}
-      className={`bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated border-2 ${variants[variant]} w-64 ${className}`}
+      className={`bg-card/95 backdrop-blur-sm rounded-2xl p-4 shadow-elevated border-2 ${variants[variant]} w-full ${className}`}
     >
       <div className="flex items-start justify-between mb-2">
         <h4 className="font-semibold text-foreground">{title}</h4>

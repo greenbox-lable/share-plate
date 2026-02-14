@@ -32,7 +32,7 @@ const Footer = () => {
               <div className="w-10 h-10 rounded-xl bg-gradient-hero flex items-center justify-center">
                 <Heart className="w-5 h-5 text-primary-foreground" fill="currentColor" />
               </div>
-              <span className="text-xl font-bold">AnnaSeva</span>
+              <span className="text-xl font-bold">FoodBridge</span>
             </Link>
             <p className="text-primary-foreground/70 text-sm mb-6">
               Connecting surplus food with hungry hearts. Together, let's build a
@@ -41,7 +41,7 @@ const Footer = () => {
             <div className="space-y-2 text-sm text-primary-foreground/70">
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4" />
-                <span>hello@annaseva.org</span>
+                <span>hello@foodbridge.org</span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4" />
@@ -109,7 +109,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 AnnaSeva. Made with{" "}
+            © 2024 FoodBridge. Made with{" "}
             <Heart className="inline w-4 h-4 text-secondary" fill="currentColor" />{" "}
             for India
           </p>

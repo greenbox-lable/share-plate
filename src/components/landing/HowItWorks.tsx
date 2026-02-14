@@ -48,7 +48,7 @@ const HowItWorks = () => {
             Simple Process
           </span>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4">
-            How AnnaSeva Works
+            How FoodBridge Works
           </h2>
           <p className="text-muted-foreground text-lg">
             From posting a donation to seeing smiles — the entire process takes
