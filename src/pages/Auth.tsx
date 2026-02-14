@@ -45,19 +45,37 @@ const Auth = () => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const getRoleDashboard = (userRole: string) => {
+    switch (userRole) {
+      case "donor": return "/donate";
+      case "ngo": return "/receive";
+      case "volunteer": return "/volunteer";
+      default: return "/";
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!role) {
+      toast({
+        title: "Please select a role",
+        description: "Choose whether you want to donate, receive, or volunteer.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     toast({
       title: mode === "signin" ? "Welcome back!" : "Account created!",
       description:
         mode === "signin"
-          ? "You're now signed in."
-          : "Please check your email to verify your account.",
+          ? "Redirecting to your dashboard..."
+          : "Account created! Redirecting to your dashboard...",
     });
-    // Navigate to home after sign in, or to auth after sign up
-    if (mode === "signin") {
-      navigate("/");
-    }
+
+    // Navigate to role-based dashboard
+    navigate(getRoleDashboard(role));
   };
 
   const roleIcons = {
@@ -127,34 +145,35 @@ const Auth = () => {
                     />
                   </div>
                 </div>
-
-                <div className="space-y-2">
-                  <Label>I want to</Label>
-                  <Select value={role} onValueChange={setRole}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="donor">
-                        <span className="flex items-center gap-2">
-                          <UtensilsCrossed className="w-4 h-4" /> Donate Food
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="ngo">
-                        <span className="flex items-center gap-2">
-                          <Building className="w-4 h-4" /> Receive Food (NGO)
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="volunteer">
-                        <span className="flex items-center gap-2">
-                          <Bike className="w-4 h-4" /> Volunteer
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
               </>
             )}
+
+            {/* Role Selection - shown for both sign in and sign up */}
+            <div className="space-y-2">
+              <Label>I am a</Label>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select your role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="donor">
+                    <span className="flex items-center gap-2">
+                      <UtensilsCrossed className="w-4 h-4" /> Food Donor
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="ngo">
+                    <span className="flex items-center gap-2">
+                      <Building className="w-4 h-4" /> NGO / Receiver
+                    </span>
+                  </SelectItem>
+                  <SelectItem value="volunteer">
+                    <span className="flex items-center gap-2">
+                      <Bike className="w-4 h-4" /> Volunteer
+                    </span>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
