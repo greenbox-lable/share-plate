@@ -12,6 +12,8 @@ const Navbar = () => {
     { name: "Impact", href: "#impact" },
     { name: "Donate Food", href: "/donate" },
     { name: "Find Food", href: "/receive" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ];
 
   return (
@@ -29,7 +31,7 @@ const Navbar = () => {
               <Heart className="w-5 h-5 text-primary-foreground" fill="currentColor" />
             </div>
             <span className="text-xl font-bold text-foreground">
-              Anna<span className="text-primary">Seva</span>
+              Food<span className="text-primary">Bridge</span>
             </span>
           </Link>
 
