@@ -1,10 +1,23 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Heart, MapPin, Users } from "lucide-react";
+import { ArrowRight, Heart, MapPin, Users, LayoutDashboard } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-food-sharing.jpg";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HeroSection = () => {
+  const { user, role } = useAuth();
+
+  const getDashboardPath = () => {
+    switch (role) {
+      case "donor": return "/donor/dashboard";
+      case "ngo": return "/receiver/dashboard";
+      case "volunteer": return "/volunteer/dashboard";
+      case "admin": return "/admin";
+      default: return "/";
+    }
+  };
+
   return (
     <section className="relative min-h-screen flex items-center pt-20 overflow-hidden">
       {/* Background Image with Overlay */}
@@ -77,14 +90,24 @@ const HeroSection = () => {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button variant="hero" size="xl" asChild>
-                <Link to="/donate" className="gap-2">
-                  Donate Food <ArrowRight className="w-5 h-5" />
-                </Link>
-              </Button>
-              <Button variant="outline" size="xl" asChild>
-                <Link to="/receive">I Need Food</Link>
-              </Button>
+              {user ? (
+                <Button variant="hero" size="xl" asChild>
+                  <Link to={getDashboardPath()} className="gap-2">
+                    <LayoutDashboard className="w-5 h-5" /> Go to Dashboard
+                  </Link>
+                </Button>
+              ) : (
+                <>
+                  <Button variant="hero" size="xl" asChild>
+                    <Link to="/auth?mode=signup" className="gap-2">
+                      Get Started <ArrowRight className="w-5 h-5" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" size="xl" asChild>
+                    <Link to="/auth">Sign In</Link>
+                  </Button>
+                </>
+              )}
             </div>
 
             {/* Stats */}
