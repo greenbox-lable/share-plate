@@ -20,11 +20,16 @@ import {
   Utensils,
   Heart,
   CheckCircle,
+  Loader2,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Donate = () => {
   const { toast } = useToast();
+  const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,8 +40,8 @@ const Donate = () => {
     expiryTime: "",
     address: "",
     landmark: "",
-    contactName: "",
-    contactPhone: "",
+    contactName: profile?.full_name || "",
+    contactPhone: profile?.phone || "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -44,15 +49,41 @@ const Donate = () => {
   };
 
   const handleSubmit = async () => {
+    if (!user) return;
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setIsSubmitting(false);
-    setStep(3);
-    toast({
-      title: "Donation Posted! 🎉",
-      description: "We're finding the best match for your donation.",
-    });
+
+    try {
+      // Build expiry timestamp from expiryTime (today + time)
+      const today = new Date().toISOString().split("T")[0];
+      const expiryTimestamp = new Date(`${today}T${formData.expiryTime}:00`).toISOString();
+
+      const { error } = await supabase.from("donations").insert({
+        donor_id: user.id,
+        food_item: `${formData.foodType} - ${formData.description}`,
+        quantity: `${formData.quantity} servings`,
+        expiry_time: expiryTimestamp,
+        pickup_address: formData.address + (formData.landmark ? `, Near: ${formData.landmark}` : ""),
+        city: profile?.city || "",
+        description: formData.description,
+        status: "pending",
+      });
+
+      if (error) throw error;
+
+      setStep(3);
+      toast({
+        title: "Donation Posted! 🎉",
+        description: "We're finding the best match for your donation.",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to post donation",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -61,11 +92,11 @@ const Donate = () => {
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center gap-4">
           <Link
-            to="/"
+            to="/donor/dashboard"
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">Dashboard</span>
           </Link>
           <div className="flex-1">
             <h1 className="text-xl font-bold text-foreground">Donate Food</h1>
@@ -172,9 +203,7 @@ const Donate = () => {
                         type="time"
                         className="pl-10"
                         value={formData.preparedTime}
-                        onChange={(e) =>
-                          handleChange("preparedTime", e.target.value)
-                        }
+                        onChange={(e) => handleChange("preparedTime", e.target.value)}
                       />
                     </div>
                   </div>
@@ -188,9 +217,7 @@ const Donate = () => {
                         type="time"
                         className="pl-10"
                         value={formData.expiryTime}
-                        onChange={(e) =>
-                          handleChange("expiryTime", e.target.value)
-                        }
+                        onChange={(e) => handleChange("expiryTime", e.target.value)}
                       />
                     </div>
                   </div>
@@ -201,9 +228,7 @@ const Donate = () => {
                   className="w-full"
                   size="lg"
                   onClick={() => setStep(2)}
-                  disabled={
-                    !formData.foodType || !formData.quantity || !formData.description
-                  }
+                  disabled={!formData.foodType || !formData.quantity || !formData.description}
                 >
                   Continue to Pickup Details
                 </Button>
@@ -257,20 +282,13 @@ const Donate = () => {
                       id="contactPhone"
                       placeholder="+91 98765 43210"
                       value={formData.contactPhone}
-                      onChange={(e) =>
-                        handleChange("contactPhone", e.target.value)
-                      }
+                      onChange={(e) => handleChange("contactPhone", e.target.value)}
                     />
                   </div>
                 </div>
 
                 <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    className="flex-1"
-                    size="lg"
-                    onClick={() => setStep(1)}
-                  >
+                  <Button variant="outline" className="flex-1" size="lg" onClick={() => setStep(1)}>
                     Back
                   </Button>
                   <Button
@@ -278,14 +296,13 @@ const Donate = () => {
                     className="flex-1"
                     size="lg"
                     onClick={handleSubmit}
-                    disabled={
-                      isSubmitting ||
-                      !formData.address ||
-                      !formData.contactName ||
-                      !formData.contactPhone
-                    }
+                    disabled={isSubmitting || !formData.address || !formData.contactName || !formData.contactPhone}
                   >
-                    {isSubmitting ? "Posting..." : "Post Donation"}
+                    {isSubmitting ? (
+                      <><Loader2 className="w-4 h-4 animate-spin mr-2" /> Posting...</>
+                    ) : (
+                      "Post Donation"
+                    )}
                   </Button>
                 </div>
               </div>
@@ -319,9 +336,9 @@ const Donate = () => {
 
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
                 <Button variant="hero" asChild>
-                  <Link to="/">Back to Home</Link>
+                  <Link to="/donor/dashboard">Go to Dashboard</Link>
                 </Button>
-                <Button variant="outline" onClick={() => setStep(1)}>
+                <Button variant="outline" onClick={() => { setStep(1); setFormData({ foodType: "", quantity: "", description: "", preparedTime: "", expiryTime: "", address: "", landmark: "", contactName: profile?.full_name || "", contactPhone: profile?.phone || "" }); }}>
                   Donate More
                 </Button>
               </div>

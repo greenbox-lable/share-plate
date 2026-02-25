@@ -14,6 +14,63 @@ export type Database = {
   }
   public: {
     Tables: {
+      donations: {
+        Row: {
+          accepted_at: string | null
+          city: string
+          created_at: string
+          delivered_at: string | null
+          description: string | null
+          donor_id: string
+          expiry_time: string
+          food_item: string
+          id: string
+          ngo_id: string | null
+          picked_up_at: string | null
+          pickup_address: string
+          quantity: string
+          status: Database["public"]["Enums"]["donation_status"]
+          updated_at: string
+          volunteer_id: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          city?: string
+          created_at?: string
+          delivered_at?: string | null
+          description?: string | null
+          donor_id: string
+          expiry_time: string
+          food_item: string
+          id?: string
+          ngo_id?: string | null
+          picked_up_at?: string | null
+          pickup_address: string
+          quantity: string
+          status?: Database["public"]["Enums"]["donation_status"]
+          updated_at?: string
+          volunteer_id?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          city?: string
+          created_at?: string
+          delivered_at?: string | null
+          description?: string | null
+          donor_id?: string
+          expiry_time?: string
+          food_item?: string
+          id?: string
+          ngo_id?: string | null
+          picked_up_at?: string | null
+          pickup_address?: string
+          quantity?: string
+          status?: Database["public"]["Enums"]["donation_status"]
+          updated_at?: string
+          volunteer_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           city: string | null
@@ -84,6 +141,7 @@ export type Database = {
     }
     Enums: {
       app_role: "donor" | "volunteer" | "ngo" | "admin"
+      donation_status: "pending" | "accepted" | "picked_up" | "delivered"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -212,6 +270,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["donor", "volunteer", "ngo", "admin"],
+      donation_status: ["pending", "accepted", "picked_up", "delivered"],
     },
   },
 } as const
