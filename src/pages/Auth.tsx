@@ -22,8 +22,10 @@ import {
   Building,
   Bike,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -32,8 +34,10 @@ const Auth = () => {
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp, signIn } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -56,7 +60,7 @@ const Auth = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!role) {
@@ -68,22 +72,61 @@ const Auth = () => {
       return;
     }
 
-    toast({
-      title: mode === "signin" ? "Welcome back!" : "Account created!",
-      description:
-        mode === "signin"
-          ? "Redirecting to your dashboard..."
-          : "Account created! Redirecting to your dashboard...",
-    });
+    if (!formData.email || !formData.password) {
+      toast({
+        title: "Missing fields",
+        description: "Please enter your email and password.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    // Navigate to role-based dashboard
-    navigate(getRoleDashboard(role));
-  };
+    if (formData.password.length < 6) {
+      toast({
+        title: "Password too short",
+        description: "Password must be at least 6 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const roleIcons = {
-    donor: UtensilsCrossed,
-    ngo: Building,
-    volunteer: Bike,
+    setIsLoading(true);
+
+    try {
+      if (mode === "signup") {
+        if (!formData.name) {
+          toast({ title: "Name required", variant: "destructive" });
+          setIsLoading(false);
+          return;
+        }
+        await signUp(formData.email, formData.password, {
+          full_name: formData.name,
+          phone: formData.phone,
+          city: formData.city,
+          role: role,
+        });
+        toast({
+          title: "Account created!",
+          description: "Redirecting to your dashboard...",
+        });
+      } else {
+        await signIn(formData.email, formData.password);
+        toast({
+          title: "Welcome back!",
+          description: "Redirecting to your dashboard...",
+        });
+      }
+
+      navigate(getRoleDashboard(role));
+    } catch (error: any) {
+      toast({
+        title: "Authentication failed",
+        description: error.message || "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -130,6 +173,7 @@ const Auth = () => {
                       className="pl-10"
                       value={formData.name}
                       onChange={(e) => handleChange("name", e.target.value)}
+                      required
                     />
                   </div>
                 </div>
@@ -164,7 +208,7 @@ const Auth = () => {
               </>
             )}
 
-            {/* Role Selection - shown for both sign in and sign up */}
+            {/* Role Selection */}
             <div className="space-y-2">
               <Label>I am a</Label>
               <Select value={role} onValueChange={setRole}>
@@ -202,6 +246,7 @@ const Auth = () => {
                   className="pl-10"
                   value={formData.email}
                   onChange={(e) => handleChange("email", e.target.value)}
+                  required
                 />
               </div>
             </div>
@@ -217,13 +262,21 @@ const Auth = () => {
                   className="pl-10"
                   value={formData.password}
                   onChange={(e) => handleChange("password", e.target.value)}
+                  required
+                  minLength={6}
                 />
               </div>
             </div>
 
-            <Button variant="hero" size="lg" className="w-full">
-              {mode === "signin" ? "Sign In" : "Create Account"}
-              <ArrowRight className="w-4 h-4" />
+            <Button variant="hero" size="lg" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <>
+                  {mode === "signin" ? "Sign In" : "Create Account"}
+                  <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Button>
           </form>
 
