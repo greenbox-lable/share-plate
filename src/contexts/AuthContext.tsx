@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfileAndRole = async (userId: string) => {
+  const fetchProfileAndRole = async (userId: string): Promise<AppRole | null> => {
     const [profileRes, roleRes] = await Promise.all([
       supabase.from("profiles").select("*").eq("user_id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId).single(),
@@ -47,9 +47,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
     }
 
-    if (roleRes.data) {
-      setRole(roleRes.data.role as AppRole);
+    const fetchedRole = roleRes.data?.role as AppRole | null;
+    if (fetchedRole) {
+      setRole(fetchedRole);
     }
+    return fetchedRole;
   };
 
   useEffect(() => {
