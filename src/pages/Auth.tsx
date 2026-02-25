@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -63,7 +64,7 @@ const Auth = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!role) {
+    if (mode === "signup" && !role) {
       toast({
         title: "Please select a role",
         description: "Choose whether you want to donate, receive, or volunteer.",
@@ -109,15 +110,25 @@ const Auth = () => {
           title: "Account created!",
           description: "Redirecting to your dashboard...",
         });
+        navigate(getRoleDashboard(role));
       } else {
         await signIn(formData.email, formData.password);
-        toast({
-          title: "Welcome back!",
-          description: "Redirecting to your dashboard...",
-        });
+        // Fetch the actual role from database after sign-in
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data: roleData } = await supabase
+            .from("user_roles")
+            .select("role")
+            .eq("user_id", session.user.id)
+            .single();
+          const userRole = roleData?.role || "donor";
+          toast({
+            title: "Welcome back!",
+            description: "Redirecting to your dashboard...",
+          });
+          navigate(getRoleDashboard(userRole));
+        }
       }
-
-      navigate(getRoleDashboard(role));
     } catch (error: any) {
       toast({
         title: "Authentication failed",
@@ -208,7 +219,8 @@ const Auth = () => {
               </>
             )}
 
-            {/* Role Selection */}
+            {/* Role Selection - only shown for signup */}
+            {mode === "signup" && (
             <div className="space-y-2">
               <Label>I am a</Label>
               <Select value={role} onValueChange={setRole}>
@@ -234,6 +246,7 @@ const Auth = () => {
                 </SelectContent>
               </Select>
             </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
