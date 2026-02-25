@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { User, Session } from "@supabase/supabase-js";
 
@@ -32,63 +32,79 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfileAndRole = async (userId: string): Promise<AppRole | null> => {
-    const [profileRes, roleRes] = await Promise.all([
-      supabase.from("profiles").select("*").eq("user_id", userId).single(),
-      supabase.from("user_roles").select("role").eq("user_id", userId).single(),
-    ]);
+  const fetchProfileAndRole = useCallback(async (userId: string): Promise<AppRole | null> => {
+    try {
+      const [profileRes, roleRes] = await Promise.all([
+        supabase.from("profiles").select("*").eq("user_id", userId).single(),
+        supabase.from("user_roles").select("role").eq("user_id", userId).single(),
+      ]);
 
-    if (profileRes.data) {
-      setProfile({
-        full_name: profileRes.data.full_name,
-        phone: profileRes.data.phone,
-        city: profileRes.data.city,
-        is_active: profileRes.data.is_active,
-      });
-    }
+      if (profileRes.data) {
+        setProfile({
+          full_name: profileRes.data.full_name,
+          phone: profileRes.data.phone,
+          city: profileRes.data.city,
+          is_active: profileRes.data.is_active,
+        });
+      }
 
-    const fetchedRole = roleRes.data?.role as AppRole | null;
-    if (fetchedRole) {
+      const fetchedRole = roleRes.data?.role as AppRole | null;
       setRole(fetchedRole);
+      return fetchedRole;
+    } catch (err) {
+      console.error("Failed to fetch profile/role:", err);
+      return null;
     }
-    return fetchedRole;
-  };
+  }, []);
 
   useEffect(() => {
+    let mounted = true;
+
+    // Set up auth listener FIRST (per Supabase docs)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      (_event, session) => {
+        if (!mounted) return;
         setSession(session);
         setUser(session?.user ?? null);
 
-        if (session?.user) {
-          await fetchProfileAndRole(session.user.id);
-        } else {
+        if (!session?.user) {
           setProfile(null);
           setRole(null);
+          setLoading(false);
         }
-        setLoading(false);
+        // Don't await here — fetch profile/role via the useEffect below
       }
     );
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Then get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
-      if (session?.user) {
-        await fetchProfileAndRole(session.user.id);
+      if (!session?.user) {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
+
+  // Fetch profile and role whenever user changes
+  useEffect(() => {
+    if (user?.id) {
+      setLoading(true);
+      fetchProfileAndRole(user.id).finally(() => setLoading(false));
+    }
+  }, [user?.id, fetchProfileAndRole]);
 
   const signUp = async (email: string, password: string, metadata: Record<string, string>) => {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: {
-        data: metadata,
-      },
+      options: { data: metadata },
     });
     if (error) throw error;
   };
