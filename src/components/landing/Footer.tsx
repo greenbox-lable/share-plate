@@ -109,9 +109,7 @@ const Footer = () => {
         {/* Bottom Bar */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-sm text-primary-foreground/60">
-            © 2024 FoodBridge. Made with{" "}
-            <Heart className="inline w-4 h-4 text-secondary" fill="currentColor" />{" "}
-            for India
+            Made by Bhumi and Team — 2026 FoodBridge
           </p>
           <p className="text-sm text-primary-foreground/60">
             Reducing food waste, one meal at a time.

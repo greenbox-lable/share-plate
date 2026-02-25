@@ -46,7 +46,7 @@ const Contact = () => {
               {[
                 { icon: Mail, label: "Email", value: "hello@foodbridge.org" },
                 { icon: Phone, label: "Phone", value: "+91 1800 123 4567" },
-                { icon: MapPin, label: "Location", value: "Bangalore, India" },
+                { icon: MapPin, label: "Location", value: "Agra, India" },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">

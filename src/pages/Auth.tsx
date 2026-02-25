@@ -21,6 +21,7 @@ import {
   UtensilsCrossed,
   Building,
   Bike,
+  MapPin,
 } from "lucide-react";
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 
@@ -39,6 +40,7 @@ const Auth = () => {
     password: "",
     name: "",
     phone: "",
+    city: "",
   });
 
   const handleChange = (field: string, value: string) => {
@@ -142,6 +144,20 @@ const Auth = () => {
                       className="pl-10"
                       value={formData.phone}
                       onChange={(e) => handleChange("phone", e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="city"
+                      placeholder="e.g., Agra, Delhi, Mumbai"
+                      className="pl-10"
+                      value={formData.city}
+                      onChange={(e) => handleChange("city", e.target.value)}
                     />
                   </div>
                 </div>
