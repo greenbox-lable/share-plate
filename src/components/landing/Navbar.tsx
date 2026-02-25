@@ -1,17 +1,27 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Heart, Menu, X } from "lucide-react";
+import { Heart, Menu, X, LogOut, LayoutDashboard } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const { user, role, profile, signOut } = useAuth();
+
+  const getDashboardPath = () => {
+    switch (role) {
+      case "donor": return "/donor/dashboard";
+      case "ngo": return "/receiver/dashboard";
+      case "volunteer": return "/volunteer/dashboard";
+      case "admin": return "/admin";
+      default: return "/";
+    }
+  };
 
   const navLinks = [
     { name: "How it Works", href: "#how-it-works" },
     { name: "Impact", href: "#impact" },
-    { name: "Donate Food", href: "/donate" },
-    { name: "Find Food", href: "/receive" },
     { name: "About", href: "/about" },
     { name: "Contact", href: "/contact" },
   ];
@@ -50,12 +60,28 @@ const Navbar = () => {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Button variant="ghost" asChild>
-              <Link to="/auth">Sign In</Link>
-            </Button>
-            <Button variant="hero" asChild>
-              <Link to="/auth?mode=signup">Get Started</Link>
-            </Button>
+            {user ? (
+              <>
+                <Button variant="hero" asChild>
+                  <Link to={getDashboardPath()}>
+                    <LayoutDashboard className="w-4 h-4 mr-2" />
+                    Dashboard
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" onClick={signOut} title="Sign Out">
+                  <LogOut className="w-4 h-4" />
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link to="/auth">Sign In</Link>
+                </Button>
+                <Button variant="hero" asChild>
+                  <Link to="/auth?mode=signup">Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,12 +115,29 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border">
-                <Button variant="outline" asChild>
-                  <Link to="/auth">Sign In</Link>
-                </Button>
-                <Button variant="hero" asChild>
-                  <Link to="/auth?mode=signup">Get Started</Link>
-                </Button>
+                {user ? (
+                  <>
+                    <Button variant="hero" asChild>
+                      <Link to={getDashboardPath()} onClick={() => setIsOpen(false)}>
+                        <LayoutDashboard className="w-4 h-4 mr-2" />
+                        Dashboard
+                      </Link>
+                    </Button>
+                    <Button variant="outline" onClick={() => { signOut(); setIsOpen(false); }}>
+                      <LogOut className="w-4 h-4 mr-2" />
+                      Sign Out
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="outline" asChild>
+                      <Link to="/auth" onClick={() => setIsOpen(false)}>Sign In</Link>
+                    </Button>
+                    <Button variant="hero" asChild>
+                      <Link to="/auth?mode=signup" onClick={() => setIsOpen(false)}>Get Started</Link>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </motion.div>
