@@ -47,9 +47,9 @@ const Auth = () => {
 
   const getRoleDashboard = (userRole: string) => {
     switch (userRole) {
-      case "donor": return "/donate";
-      case "ngo": return "/receive";
-      case "volunteer": return "/volunteer";
+      case "donor": return "/donor/dashboard";
+      case "ngo": return "/receiver/dashboard";
+      case "volunteer": return "/volunteer/dashboard";
       default: return "/";
     }
   };
