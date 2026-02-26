@@ -57,6 +57,7 @@ const Auth = () => {
       case "donor": return "/donor/dashboard";
       case "ngo": return "/receiver/dashboard";
       case "volunteer": return "/volunteer/dashboard";
+      case "admin": return "/admin";
       default: return "/";
     }
   };
