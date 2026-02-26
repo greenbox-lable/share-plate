@@ -24,8 +24,9 @@ const HeroSection = () => {
       <div className="absolute inset-0 z-0">
         <img
           src={heroImage}
-          alt="Community food sharing"
+          alt="Community food sharing - ANNA SEVA"
           className="w-full h-full object-cover"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/80 to-background/50" />
       </div>
@@ -42,7 +43,7 @@ const HeroSection = () => {
             <FloatingCard
               title="Food Rescued"
               subtitle="120 kg saved today"
-              location="Bangalore, India"
+              location="Agra, India"
               time="Updated just now"
               delay={0.5}
               variant="success"
@@ -50,7 +51,7 @@ const HeroSection = () => {
             <FloatingCard
               title="NGO Matched"
               subtitle="Hope Foundation accepted"
-              location="JP Nagar, Bangalore"
+              location="Agra"
               time="5 mins ago"
               delay={0.7}
               variant="warm"
@@ -128,14 +129,14 @@ const HeroSection = () => {
             <FloatingCard
               title="New Donation"
               subtitle="50 meals available"
-              location="Koramangala, Bangalore"
+              location="Taj Nagari, Agra"
               time="Expires in 2 hours"
               delay={0.5}
             />
             <FloatingCard
               title="Pickup Assigned"
               subtitle="Volunteer on the way"
-              location="Indiranagar, Bangalore"
+              location="Dayal Bagh, Agra"
               time="ETA: 15 mins"
               delay={0.7}
               variant="warm"
@@ -143,7 +144,7 @@ const HeroSection = () => {
             <FloatingCard
               title="Delivered!"
               subtitle="30 meals to Hope NGO"
-              location="JP Nagar, Bangalore"
+              location="Sikandra, Agra"
               time="Just now"
               delay={0.9}
               variant="success"

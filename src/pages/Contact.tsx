@@ -5,18 +5,40 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Loader2 } from "lucide-react";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({ name: "", email: "", subject: "", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Message Sent!", description: "We'll get back to you within 24 hours." });
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    if (!formData.name || !formData.email || !formData.message) {
+      toast({ title: "Please fill all required fields", variant: "destructive" });
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { error } = await supabase.from("contact_messages").insert({
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim(),
+      });
+      if (error) throw error;
+
+      toast({ title: "Message Sent! ✅", description: "We'll get back to you within 24 hours." });
+      setFormData({ name: "", email: "", subject: "", message: "" });
+    } catch (error: any) {
+      toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -37,14 +59,13 @@ const Contact = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
-            {/* Contact Info */}
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} className="space-y-8">
               <div>
                 <h2 className="text-2xl font-bold text-foreground mb-4">Get in Touch</h2>
                 <p className="text-muted-foreground">Whether you want to partner, volunteer, or just learn more — reach out!</p>
               </div>
               {[
-                { icon: Mail, label: "Email", value: "hello@foodbridge.org" },
+                { icon: Mail, label: "Email", value: "hello@annaseva.org" },
                 { icon: Phone, label: "Phone", value: "+91 1800 123 4567" },
                 { icon: MapPin, label: "Location", value: "Agra, India" },
               ].map((item) => (
@@ -60,7 +81,6 @@ const Contact = () => {
               ))}
             </motion.div>
 
-            {/* Form */}
             <motion.form
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -69,12 +89,12 @@ const Contact = () => {
             >
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Name</Label>
-                  <Input placeholder="Your name" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} />
+                  <Label>Name *</Label>
+                  <Input placeholder="Your name" value={formData.name} onChange={(e) => setFormData(p => ({ ...p, name: e.target.value }))} required />
                 </div>
                 <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input type="email" placeholder="you@example.com" value={formData.email} onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))} />
+                  <Label>Email *</Label>
+                  <Input type="email" placeholder="you@example.com" value={formData.email} onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))} required />
                 </div>
               </div>
               <div className="space-y-2">
@@ -82,11 +102,12 @@ const Contact = () => {
                 <Input placeholder="How can we help?" value={formData.subject} onChange={(e) => setFormData(p => ({ ...p, subject: e.target.value }))} />
               </div>
               <div className="space-y-2">
-                <Label>Message</Label>
-                <Textarea placeholder="Your message..." rows={5} value={formData.message} onChange={(e) => setFormData(p => ({ ...p, message: e.target.value }))} />
+                <Label>Message *</Label>
+                <Textarea placeholder="Your message..." rows={5} value={formData.message} onChange={(e) => setFormData(p => ({ ...p, message: e.target.value }))} required />
               </div>
-              <Button variant="hero" className="w-full" size="lg">
-                <Send className="w-4 h-4 mr-2" /> Send Message
+              <Button variant="hero" className="w-full" size="lg" disabled={isSubmitting}>
+                {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Send className="w-4 h-4 mr-2" />}
+                {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
             </motion.form>
           </div>
