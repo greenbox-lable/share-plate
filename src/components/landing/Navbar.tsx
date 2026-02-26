@@ -41,7 +41,7 @@ const Navbar = () => {
               <Heart className="w-5 h-5 text-primary-foreground" fill="currentColor" />
             </div>
             <span className="text-xl font-bold text-foreground">
-              Food<span className="text-primary">Bridge</span>
+              ANNA<span className="text-primary"> SEVA</span>
             </span>
           </Link>
 

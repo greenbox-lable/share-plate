@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          subject: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          subject?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string | null
+        }
+        Relationships: []
+      }
       donations: {
         Row: {
           accepted_at: string | null
@@ -24,6 +54,7 @@ export type Database = {
           donor_id: string
           expiry_time: string
           food_item: string
+          food_source: string | null
           id: string
           ngo_id: string | null
           picked_up_at: string | null
@@ -42,6 +73,7 @@ export type Database = {
           donor_id: string
           expiry_time: string
           food_item: string
+          food_source?: string | null
           id?: string
           ngo_id?: string | null
           picked_up_at?: string | null
@@ -60,6 +92,7 @@ export type Database = {
           donor_id?: string
           expiry_time?: string
           food_item?: string
+          food_source?: string | null
           id?: string
           ngo_id?: string | null
           picked_up_at?: string | null

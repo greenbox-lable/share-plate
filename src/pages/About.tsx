@@ -17,7 +17,7 @@ const About = () => {
             animate={{ opacity: 1, y: 0 }}
             className="text-4xl md:text-5xl font-bold mb-4"
           >
-            About FoodBridge
+            About ANNA SEVA
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 20 }}
@@ -65,7 +65,7 @@ const About = () => {
               <h2 className="text-2xl font-bold text-foreground mb-4">Our Vision</h2>
               <p className="text-muted-foreground leading-relaxed">
                 A world where no edible food is wasted while someone sleeps hungry.
-                We envision FoodBridge as India's largest food rescue network,
+                We envision ANNA SEVA as India's largest food rescue network,
                 connecting every city, every neighborhood, every person who wants
                 to make a difference.
               </p>
