@@ -438,6 +438,15 @@ const Auth = () => {
                   Sign in
                 </button>
               </>
+            ) : mode === "new_password" ? (
+              <>
+                <button
+                  onClick={() => setMode("signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Back to Sign In
+                </button>
+              </>
             ) : (
               <>
                 Already have an account?{" "}
