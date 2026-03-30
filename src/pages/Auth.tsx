@@ -349,6 +349,16 @@ const Auth = () => {
                   Sign up
                 </button>
               </>
+            ) : mode === "forgot" ? (
+              <>
+                Remember your password?{" "}
+                <button
+                  onClick={() => setMode("signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Sign in
+                </button>
+              </>
             ) : (
               <>
                 Already have an account?{" "}
