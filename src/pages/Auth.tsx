@@ -31,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
-  const [mode, setMode] = useState<"signin" | "signup">(
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
@@ -62,8 +62,36 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email) {
+      toast({ title: "Please enter your email", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "Reset link sent!",
+        description: "Check your email for the password reset link.",
+      });
+      setMode("signin");
+    } catch (error: any) {
+      toast({ title: "Failed to send reset link", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (mode === "forgot") {
+      return handleForgotPassword(e);
+    }
 
     if (mode === "signup" && !role) {
       toast({
@@ -114,7 +142,6 @@ const Auth = () => {
         navigate(getRoleDashboard(role));
       } else {
         await signIn(formData.email, formData.password);
-        // Fetch the actual role from database after sign-in
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const { data: roleData } = await supabase
@@ -163,11 +190,13 @@ const Auth = () => {
 
           {/* Header */}
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            {mode === "signin" ? "Welcome back" : "Join the movement"}
+            {mode === "signin" ? "Welcome back" : mode === "forgot" ? "Forgot password?" : "Join the movement"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
               ? "Sign in to continue making an impact"
+              : mode === "forgot"
+              ? "Enter your email and we'll send you a reset link"
               : "Create an account to start sharing food"}
           </p>
 
@@ -265,6 +294,7 @@ const Auth = () => {
               </div>
             </div>
 
+            {mode !== "forgot" && (
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -281,13 +311,26 @@ const Auth = () => {
                 />
               </div>
             </div>
+            )}
+
+            {mode === "signin" && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             <Button variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  {mode === "signin" ? "Sign In" : "Create Account"}
+                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Send Reset Link" : "Create Account"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -304,6 +347,16 @@ const Auth = () => {
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign up
+                </button>
+              </>
+            ) : mode === "forgot" ? (
+              <>
+                Remember your password?{" "}
+                <button
+                  onClick={() => setMode("signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Sign in
                 </button>
               </>
             ) : (
