@@ -294,6 +294,7 @@ const Auth = () => {
               </div>
             </div>
 
+            {mode !== "forgot" && (
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -310,13 +311,26 @@ const Auth = () => {
                 />
               </div>
             </div>
+            )}
+
+            {mode === "signin" && (
+              <div className="text-right -mt-2">
+                <button
+                  type="button"
+                  onClick={() => setMode("forgot")}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
 
             <Button variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  {mode === "signin" ? "Sign In" : "Create Account"}
+                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Send Reset Link" : "Create Account"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
