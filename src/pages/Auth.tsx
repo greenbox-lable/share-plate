@@ -31,11 +31,13 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
-  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "new_password">(
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signUp, signIn } = useAuth();
@@ -70,17 +72,46 @@ const Auth = () => {
     }
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email: formData.email, action: "check_email" },
       });
       if (error) throw error;
-      toast({
-        title: "Reset link sent!",
-        description: "Check your email for the password reset link.",
-      });
-      setMode("signin");
+      if (data.exists) {
+        setMode("new_password");
+        toast({ title: "Email found!", description: "Please set your new password." });
+      } else {
+        toast({ title: "Email not found", description: "No account exists with this email.", variant: "destructive" });
+      }
     } catch (error: any) {
-      toast({ title: "Failed to send reset link", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email: formData.email, newPassword, action: "reset_password" },
+      });
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+      toast({ title: "Password updated!", description: "You can now sign in with your new password." });
+      setMode("signin");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      toast({ title: "Failed to reset password", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
