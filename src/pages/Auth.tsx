@@ -31,11 +31,13 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
-  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot" | "new_password">(
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate();
   const { toast } = useToast();
   const { signUp, signIn } = useAuth();
@@ -70,17 +72,46 @@ const Auth = () => {
     }
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email: formData.email, action: "check_email" },
       });
       if (error) throw error;
-      toast({
-        title: "Reset link sent!",
-        description: "Check your email for the password reset link.",
-      });
-      setMode("signin");
+      if (data.exists) {
+        setMode("new_password");
+        toast({ title: "Email found!", description: "Please set your new password." });
+      } else {
+        toast({ title: "Email not found", description: "No account exists with this email.", variant: "destructive" });
+      }
     } catch (error: any) {
-      toast({ title: "Failed to send reset link", description: error.message, variant: "destructive" });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Passwords do not match", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("reset-password", {
+        body: { email: formData.email, newPassword, action: "reset_password" },
+      });
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+      toast({ title: "Password updated!", description: "You can now sign in with your new password." });
+      setMode("signin");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      toast({ title: "Failed to reset password", description: error.message, variant: "destructive" });
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +122,10 @@ const Auth = () => {
 
     if (mode === "forgot") {
       return handleForgotPassword(e);
+    }
+
+    if (mode === "new_password") {
+      return handleResetPassword(e);
     }
 
     if (mode === "signup" && !role) {
@@ -190,13 +225,15 @@ const Auth = () => {
 
           {/* Header */}
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            {mode === "signin" ? "Welcome back" : mode === "forgot" ? "Forgot password?" : "Join the movement"}
+            {mode === "signin" ? "Welcome back" : mode === "forgot" ? "Forgot password?" : mode === "new_password" ? "Set new password" : "Join the movement"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
               ? "Sign in to continue making an impact"
               : mode === "forgot"
-              ? "Enter your email and we'll send you a reset link"
+              ? "Enter your email to verify your account"
+              : mode === "new_password"
+              ? "Create a new password for your account"
               : "Create an account to start sharing food"}
           </p>
 
@@ -278,6 +315,7 @@ const Auth = () => {
             </div>
             )}
 
+            {mode !== "new_password" && (
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -293,8 +331,9 @@ const Auth = () => {
                 />
               </div>
             </div>
+            )}
 
-            {mode !== "forgot" && (
+            {(mode === "signin" || mode === "signup") && (
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -325,12 +364,52 @@ const Auth = () => {
               </div>
             )}
 
+            {mode === "new_password" && (
+              <>
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                  Resetting password for: <strong>{formData.email}</strong>
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-10"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-10"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             <Button variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Send Reset Link" : "Create Account"}
+                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Verify Email" : mode === "new_password" ? "Update Password" : "Create Account"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -357,6 +436,15 @@ const Auth = () => {
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign in
+                </button>
+              </>
+            ) : mode === "new_password" ? (
+              <>
+                <button
+                  onClick={() => setMode("signin")}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Back to Sign In
                 </button>
               </>
             ) : (
