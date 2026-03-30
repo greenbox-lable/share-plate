@@ -315,6 +315,7 @@ const Auth = () => {
             </div>
             )}
 
+            {mode !== "new_password" && (
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <div className="relative">
@@ -330,8 +331,9 @@ const Auth = () => {
                 />
               </div>
             </div>
+            )}
 
-            {mode !== "forgot" && (
+            {(mode === "signin" || mode === "signup") && (
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
               <div className="relative">
@@ -362,12 +364,52 @@ const Auth = () => {
               </div>
             )}
 
+            {mode === "new_password" && (
+              <>
+                <p className="text-sm text-muted-foreground bg-muted p-3 rounded-lg">
+                  Resetting password for: <strong>{formData.email}</strong>
+                </p>
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-10"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="••••••••"
+                      className="pl-10"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
             <Button variant="hero" size="lg" className="w-full" disabled={isLoading}>
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
               ) : (
                 <>
-                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Send Reset Link" : "Create Account"}
+                  {mode === "signin" ? "Sign In" : mode === "forgot" ? "Verify Email" : mode === "new_password" ? "Update Password" : "Create Account"}
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
