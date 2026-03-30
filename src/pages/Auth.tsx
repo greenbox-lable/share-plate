@@ -225,13 +225,15 @@ const Auth = () => {
 
           {/* Header */}
           <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            {mode === "signin" ? "Welcome back" : mode === "forgot" ? "Forgot password?" : "Join the movement"}
+            {mode === "signin" ? "Welcome back" : mode === "forgot" ? "Forgot password?" : mode === "new_password" ? "Set new password" : "Join the movement"}
           </h1>
           <p className="text-muted-foreground mb-8">
             {mode === "signin"
               ? "Sign in to continue making an impact"
               : mode === "forgot"
-              ? "Enter your email and we'll send you a reset link"
+              ? "Enter your email to verify your account"
+              : mode === "new_password"
+              ? "Create a new password for your account"
               : "Create an account to start sharing food"}
           </p>
 
