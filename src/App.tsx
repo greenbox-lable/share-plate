@@ -10,6 +10,7 @@ import Donate from "./pages/Donate";
 import Receive from "./pages/Receive";
 import Volunteer from "./pages/Volunteer";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Admin from "./pages/Admin";
