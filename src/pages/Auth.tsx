@@ -31,7 +31,7 @@ import { supabase } from "@/integrations/supabase/client";
 const Auth = () => {
   const [searchParams] = useSearchParams();
   const isSignup = searchParams.get("mode") === "signup";
-  const [mode, setMode] = useState<"signin" | "signup">(
+  const [mode, setMode] = useState<"signin" | "signup" | "forgot">(
     isSignup ? "signup" : "signin"
   );
   const [role, setRole] = useState<string>("");
