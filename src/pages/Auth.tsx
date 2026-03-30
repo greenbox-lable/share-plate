@@ -62,8 +62,36 @@ const Auth = () => {
     }
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.email) {
+      toast({ title: "Please enter your email", variant: "destructive" });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(formData.email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      if (error) throw error;
+      toast({
+        title: "Reset link sent!",
+        description: "Check your email for the password reset link.",
+      });
+      setMode("signin");
+    } catch (error: any) {
+      toast({ title: "Failed to send reset link", description: error.message, variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (mode === "forgot") {
+      return handleForgotPassword(e);
+    }
 
     if (mode === "signup" && !role) {
       toast({
@@ -114,7 +142,6 @@ const Auth = () => {
         navigate(getRoleDashboard(role));
       } else {
         await signIn(formData.email, formData.password);
-        // Fetch the actual role from database after sign-in
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
           const { data: roleData } = await supabase
