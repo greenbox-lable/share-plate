@@ -124,6 +124,10 @@ const Auth = () => {
       return handleForgotPassword(e);
     }
 
+    if (mode === "new_password") {
+      return handleResetPassword(e);
+    }
+
     if (mode === "signup" && !role) {
       toast({
         title: "Please select a role",
